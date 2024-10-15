@@ -5,6 +5,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra", "infra", "{A0773B5C-0267-4EF7-AF3F-403A2F536B1F}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yaml = docker-compose.yaml
+		docker-compose.override.yaml = docker-compose.override.yaml
 	EndProjectSection
 EndProject
 Global
