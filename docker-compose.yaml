@@ -1,0 +1,36 @@
+﻿services:
+  kcdemo-api:
+    image: kcdemo-api
+    container_name: kcdemo-api
+    build:
+      context: .
+      dockerfile: ./KCDemo.WebAPI/Dockerfile
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+#      - ASPNETCORE_URLS=http://+:8080;https://+:8081
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://kcdemo-jaeger:4317
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: kcdemo-keycloak
+    command: start-dev
+    environment:
+      - KC_HEALTH_ENABLED=true
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./.containers/identity:/opt/keycloak/data
+    ports:
+      - 18080:8080
+  
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: kcdemo-jaeger
+    ports:
+      - 4317:4317
+      - 4318:4318
+      - 16686:16686
+        

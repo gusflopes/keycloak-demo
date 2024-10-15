@@ -1,0 +1,6 @@
+@KCDemo.WebAPI_HostAddress = http://localhost:5188
+
+GET {{KCDemo.WebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
