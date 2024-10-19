@@ -1,51 +1,48 @@
-using System.Security.Claims;
-using KCDemo.WebAPI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        
         options.RequireHttpsMetadata = false;
         options.Audience = builder.Configuration["Authentication:Audience"];
         options.MetadataAddress = builder.Configuration["Authentication:MetadataAddress"];
-        
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidIssuer = builder.Configuration["Authentication:ValidIssuer"],
         };
-
     });
 
-builder.Services.AddOpenTelemetryExtensions();
+builder.Services
+    .AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("KCDemo.Proxy"))
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGenWithAuth(builder.Configuration);
+        tracing.AddOtlpExporter();
+    });
+    
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.MapGet("users/me", ((ClaimsPrincipal claimsPrincipal) =>
-{
-    return claimsPrincipal.Claims.ToDictionary(c => c.Type, c => c.Value);
-}))
-    .RequireAuthorization();
+app.MapReverseProxy();
 
 app.UseAuthentication();
-app.UseAuthorization();
 
-app.UseHttpsRedirection();
+app.UseAuthorization();
 
 app.Run();

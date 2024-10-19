@@ -16,11 +16,7 @@ internal static class OpenTelemetryExtensions
                 tracing
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
-                    .AddOtlpExporter(options =>
-                    {
-                        options.Endpoint = new Uri("http://localhost:4317");
-                        options.Protocol = OtlpExportProtocol.Grpc;
-                    });
+                    .AddOtlpExporter();
             });
         return services;
     }

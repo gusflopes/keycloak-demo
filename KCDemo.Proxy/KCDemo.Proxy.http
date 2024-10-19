@@ -1,0 +1,6 @@
+@KCDemo.Proxy_HostAddress = http://localhost:5107
+
+GET {{KCDemo.Proxy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
